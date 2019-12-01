@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.util.Optional;
+
 public interface UserDAO extends CrudRepository<User, Long> {
 
     @Query(nativeQuery = true , value = "select u.* from document " +
@@ -14,5 +16,5 @@ public interface UserDAO extends CrudRepository<User, Long> {
 
     User findByEmailOrNumberOfPrincipalDocument(String email , String numberOfPrincipalDocument);
 
-
+Optional<User> findByUsername(String str);
 }
