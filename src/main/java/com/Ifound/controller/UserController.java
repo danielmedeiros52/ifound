@@ -29,7 +29,13 @@ public class UserController {
 
 @PostMapping("/changeBlock")
     public ResponseEntity changeBlock(@RequestBody UserDto dto){
-    return ResponseEntity.ok(service.activeToggle(dto));
+    ResponseEntity responseEntity = null;
+    try {
+        responseEntity = ResponseEntity.ok(service.activeToggle(dto));
+    }catch (UserException e){
+        responseEntity = ResponseEntity.badRequest().body(e.getMessage());
+    }
+    return responseEntity;
 }
 
 }

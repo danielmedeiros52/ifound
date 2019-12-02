@@ -25,7 +25,7 @@ public class User {
     @JoinColumn(name="owner_document_id")
     private List<Document> documents;
     @Email
-    @Column(name = "email")
+    @Column(name = "email",nullable = false, unique = true)
     private String email;
     @Column(name = "cellphone")
     private String cellphone;
@@ -40,11 +40,13 @@ public class User {
     @Column(name = "type")
     @Enumerated(EnumType.ORDINAL)
     private EnumUserType type;
-    @Column(name = "number_of_principal_document")
+    @Column(name = "number_of_principal_document" , nullable = false, unique = true)
     private String numberOfPrincipalDocument;
     private boolean isActive;
+    @Column(nullable = false, unique = true)
     private String username;
     private String token;
+    @Column(nullable = false)
     private String password;
     private Date lastPasswordResetDate;
     private Date lastLogin;

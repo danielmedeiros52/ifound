@@ -17,4 +17,10 @@ public interface UserDAO extends CrudRepository<User, Long> {
     User findByEmailOrNumberOfPrincipalDocument(String email , String numberOfPrincipalDocument);
 
 Optional<User> findByUsername(String str);
+
+    User findFirstByUsername(String s);
+
+    boolean existsByUsername(String login);
+
+
 }
