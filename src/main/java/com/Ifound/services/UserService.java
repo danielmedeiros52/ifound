@@ -10,8 +10,8 @@ import com.Ifound.exception.UserException;
 import com.Ifound.model.User;
 import io.jsonwebtoken.Clock;
 import io.jsonwebtoken.impl.DefaultClock;
-import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -34,14 +34,14 @@ public class UserService {
     }
 
     public User register(UserDto dto,String credentials) throws IFoundAuthenticationException, UserException, UserAuthenticationException {
-        String login = new String(Base64.decodeBase64(credentials.getBytes())).split(":")[0];
-        if (dao.existsByUsername(login)) {
+       Pair<String,String> userNameAndPassword = authService.extractUserNameAndPassword(credentials);
+        if (dao.existsByUsername(userNameAndPassword.getFirst())) {
             throw new UserAuthenticationException("User already exists!");
         }
-        if (authService.verifyUserToRegister(dto)) ;
+        authService.verifyUserToRegister(dto);
         User user = parseDtoToModel(dto);
-        user.setUsername(login);
-        user.setPassword(passwordEncoder.encode(new String(Base64.decodeBase64(credentials.getBytes())).split(":")[1]));
+        user.setUsername(userNameAndPassword.getFirst());
+        user.setPassword(passwordEncoder.encode(userNameAndPassword.getSecond()));
         return save(user);
     }
 
@@ -61,10 +61,8 @@ public class UserService {
         try {
             return dao.save(user);
         }catch (Exception ex){
-
             throw new UserException(ex.getMessage());
         }
-
     }
 
     public User activeToggle(UserDto dto) throws UserException {
@@ -89,11 +87,11 @@ public class UserService {
 
     }
     public String authenticate(String credentials) throws UserAuthenticationException {
-
-        User userAuth = dao.findFirstByUsername(new String(Base64.decodeBase64(credentials.getBytes())).split(":")[0]);
+        Pair<String, String> userNameAndPassword = authService.extractUserNameAndPassword(credentials);
+        User userAuth = dao.findFirstByUsername(userNameAndPassword.getFirst());
         if (userAuth == null) {
             throw new UserAuthenticationException("invalid user, verify your credentials");
-        } else if (passwordEncoder.matches(new String(Base64.decodeBase64(credentials.getBytes())).split(":")[1],
+        } else if (passwordEncoder.matches(userNameAndPassword.getSecond(),
                 userAuth.getPassword())) {
             updateLastLogin(userAuth);
 

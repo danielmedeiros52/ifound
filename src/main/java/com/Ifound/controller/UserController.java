@@ -12,30 +12,32 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService service;
+
     @Autowired
     public UserController(UserService service) {
         this.service = service;
     }
+
     @PutMapping
-    public ResponseEntity update(@RequestBody UserDto dto){
-        ResponseEntity responseEntity = null;
+    public ResponseEntity update(@RequestBody UserDto dto) {
+        ResponseEntity responseEntity;
         try {
             responseEntity = ResponseEntity.ok(service.update(dto));
-        }catch (UserException e){
+        } catch (UserException e) {
             responseEntity = ResponseEntity.badRequest().body(e.getMessage());
         }
         return responseEntity;
     }
 
-@PostMapping("/changeBlock")
-    public ResponseEntity changeBlock(@RequestBody UserDto dto){
-    ResponseEntity responseEntity = null;
-    try {
-        responseEntity = ResponseEntity.ok(service.activeToggle(dto));
-    }catch (UserException e){
-        responseEntity = ResponseEntity.badRequest().body(e.getMessage());
+    @PostMapping("/changeBlock")
+    public ResponseEntity changeBlock(@RequestBody UserDto dto) {
+        ResponseEntity responseEntity ;
+        try {
+            responseEntity = ResponseEntity.ok(service.activeToggle(dto));
+        } catch (UserException e) {
+            responseEntity = ResponseEntity.badRequest().body(e.getMessage());
+        }
+        return responseEntity;
     }
-    return responseEntity;
-}
 
 }

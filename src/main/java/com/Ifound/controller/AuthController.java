@@ -10,7 +10,6 @@ import com.Ifound.services.UserService;
 import com.Ifound.util.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +24,7 @@ public class AuthController {
     private final UserService userService;
     private final JwtUtils jwtUtils;
     private final String tokenHeader;
-    private  final  UserDetailService userDetailService;
+    private final UserDetailService userDetailService;
 
     @Autowired
     public AuthController(UserService userService, JwtUtils jwtUtils, @Value("${jwt.header}") String tokenHeader, UserDetailService userDetailService) {
@@ -35,9 +34,9 @@ public class AuthController {
         this.userDetailService = userDetailService;
     }
 
-    @PostMapping("register")
-    public ResponseEntity register(@RequestBody UserDto dto,@RequestHeader(name = "Authorization") String credentials) {
-        ResponseEntity responseEntity = null;
+    @PostMapping("/register")
+    public ResponseEntity register(@RequestBody UserDto dto, @RequestHeader(name = "Authorization") String credentials) {
+        ResponseEntity responseEntity;
         try {
             responseEntity = ResponseEntity.ok(userService.register(dto, credentials));
         } catch (IFoundAuthenticationException | UserException | UserAuthenticationException e) {
@@ -46,14 +45,15 @@ public class AuthController {
         return responseEntity;
     }
 
-    public String userLogin(@RequestHeader("Authorization") String credentials, HttpServletResponse response) {
+    @PostMapping("/login")
+    public ResponseEntity userLogin(@RequestHeader("Authorization") String credentials) {
         try {
-            return userService.authenticate(credentials);
+            return ResponseEntity.ok(userService.authenticate(credentials));
         } catch (UserAuthenticationException ex) {
-            response.setStatus(HttpStatus.ACCEPTED.value());
-            return ex.getMessage();
+            return ResponseEntity.status(404).body(ex.getMessage());
         }
     }
+
     @GetMapping("/refresh")
     public ResponseEntity jwtGetRefresh(HttpServletRequest request) throws UserAuthenticationException {
         final String authToken = request.getHeader(tokenHeader);
@@ -63,12 +63,12 @@ public class AuthController {
             String refreshedToken = jwtUtils.refreshToken(authToken);
             return ResponseEntity.ok(refreshedToken);
         } else {
-            return  ResponseEntity.badRequest().body(404);
+            return ResponseEntity.badRequest().body(404);
         }
     }
 
     @GetMapping("/sessionActive")
-    public void sessionActive( HttpServletResponse response , HttpServletRequest request) throws UserAuthenticationException {
+    public void sessionActive(HttpServletResponse response, HttpServletRequest request) throws UserAuthenticationException {
         final String authToken = request.getHeader(tokenHeader);
         if (jwtUtils.validExpiration(authToken)) {
             response.setStatus(HttpServletResponse.SC_OK);
@@ -76,9 +76,10 @@ public class AuthController {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         }
     }
+
     @PreAuthorize("hasAnyAuthority('AUTH_VIEWER','AUTH_USER','AUTH_MANAGER','AUTH_ADMIN')")
     @GetMapping("/register2")
-    public String teste(){
+    public String teste() {
         return "pong";
     }
 
