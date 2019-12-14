@@ -23,4 +23,5 @@ Optional<User> findByUsername(String str);
     boolean existsByUsername(String login);
 
 
+    Optional<User> findByNumberOfPrincipalDocument(String document);
 }

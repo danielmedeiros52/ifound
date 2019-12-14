@@ -15,6 +15,8 @@ import org.springframework.data.util.Pair;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 
 @Service
 public class UserService {
@@ -53,6 +55,14 @@ public class UserService {
         }
     }
 
+    public User update(User user) throws UserException {
+        try {
+            return save(user);
+        } catch (Exception ex) {
+            throw new UserException(ex.getMessage());
+        }
+    }
+
     private User save(UserDto dto) throws UserException {
         return save(parseDtoToModel(dto));
     }
@@ -60,7 +70,7 @@ public class UserService {
     private User save(User user) throws UserException {
         try {
             return dao.save(user);
-        }catch (Exception ex){
+        } catch (Exception ex) {
             throw new UserException(ex.getMessage());
         }
     }
@@ -99,9 +109,17 @@ public class UserService {
         }
         throw new UserAuthenticationException("invalid user, verify your credentials");
     }
+
     private void updateLastLogin(User user) {
         user.setLastLogin(clock.now());
         dao.save(user);
     }
 
+    public Optional<User> loadUserById(long id) {
+        return dao.findById(id);
+    }
+
+    public Optional<User> loadUserBynumberOfPrincipalDocument(String document) {
+        return dao.findByNumberOfPrincipalDocument(document);
+    }
 }
